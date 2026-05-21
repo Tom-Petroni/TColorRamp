@@ -1,0 +1,46 @@
+﻿use crate::{
+    TargetPlatform,
+    util::{crate_root, target_directory},
+};
+use anyhow::Result;
+
+pub async fn create_package(target: TargetPlatform, versions: Vec<String>) -> Result<()> {
+    let target_path = crate_root().join("TColorRamp");
+    let filename = match target {
+        TargetPlatform::Windows => "TColorRamp.dll",
+        TargetPlatform::Linux => "libTColorRamp.so",
+        TargetPlatform::MacosAarch64 | TargetPlatform::MacosX86_64 => "libTColorRamp.dylib",
+    };
+
+    for version in &versions {
+        let (os_name, arch_name) = match target {
+            TargetPlatform::Linux => ("linux", "x86_64"),
+            TargetPlatform::Windows => ("windows", "x86_64"),
+            TargetPlatform::MacosAarch64 => ("macos", "aarch64"),
+            TargetPlatform::MacosX86_64 => ("macos", "x86_64"),
+        };
+
+        let target_binary_path = target_path
+            .join("bin")
+            .join(version)
+            .join(os_name)
+            .join(arch_name);
+        tokio::fs::create_dir_all(&target_binary_path).await?;
+
+        let source_binary_path = target_directory()
+            .join("nuke")
+            .join("builds")
+            .join(version)
+            .join(format!("{arch_name}-{os_name}"))
+            .join(&filename);
+
+        if !source_binary_path.exists() {
+            log::warn!("Could not collect {version} as it was not found.");
+            continue;
+        }
+
+        tokio::fs::copy(source_binary_path, target_binary_path.join(filename)).await?;
+    }
+
+    Ok(())
+}

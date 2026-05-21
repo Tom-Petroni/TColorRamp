@@ -32,17 +32,22 @@ Depuis la racine du repo:
 
 ```powershell
 cd work
-$env:NUKE_SOURCE_PATH = "C:/Program Files/Nuke16.0v6"
-$env:PLATFORM_NAME = "windows"
-cargo build --release -p tcolorramp-nuke
+cargo xtask --compile --nuke-versions 16.0 --target-platform windows --output-to-package --limit-threads
 ```
 
-Publication binaire Windows (Nuke 16.0):
+Exemples cibles:
 
-```powershell
-cd work
-.\scripts\publish_windows.ps1 -NukeVersion 16.0
-```
+- Linux: `--target-platform linux`
+- macOS Intel: `--target-platform macos-x86-64`
+- macOS Apple Silicon: `--target-platform macos-aarch64`
+
+## Build CI GitHub
+
+Le repo contient un workflow GitHub Actions (`.github/workflows/nuke-build.yml`) qui:
+
+- build les versions Nuke 13.0 -> 17.0
+- build Windows/Linux/macOS (x86_64 + arm64 quand disponible)
+- genere un zip de release pret a copier dans `.nuke`
 
 ## Installer dans Nuke
 

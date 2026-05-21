@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "crates/tcolorramp-nuke",
+    "xtask",
 ]
 resolver = "2"

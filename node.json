@@ -1,0 +1,12 @@
+{
+  "key": "TColorRamp",
+  "label": "TColorRamp",
+  "version": "1.0.0",
+  "status": "stable",
+  "class_name": "TColorRamp",
+  "bootstrap_module": "TColorRamp.init",
+  "python_path": "publish",
+  "work_path": "work",
+  "publish_path": "publish",
+  "notes": "Promoted to TSuite stable"
+}

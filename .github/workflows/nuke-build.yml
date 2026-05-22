@@ -299,5 +299,51 @@ jobs:
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
+  sync_publish:
+    name: Sync Publish Folder To Repo
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Rebuild publish payload from artifacts
+        working-directory: .
+        run: |
+          rm -rf publish/TColorRamp/bin
+          mkdir -p publish/TColorRamp/bin
+
+          for artifact in dist/*; do
+            if [[ -d "$artifact/TColorRamp" ]]; then
+              rsync -a "$artifact/TColorRamp/" "publish/TColorRamp/"
+            fi
+          done
+
+          find publish/TColorRamp -type d -name "__pycache__" -prune -exec rm -rf {} +
+
+      - name: Commit publish updates
+        working-directory: .
+        run: |
+          if git diff --quiet -- publish/TColorRamp; then
+            echo "No publish changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add publish/TColorRamp
+          git commit -m "chore(publish): sync compiled binaries [skip ci]"
+          git push origin HEAD:main
+
 
 

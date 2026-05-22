@@ -49,17 +49,20 @@ Le repo contient un workflow GitHub Actions (`.github/workflows/nuke-build.yml`)
 - build Windows/Linux/macOS (x86_64 + arm64 quand disponible)
 - genere un zip de release pret a copier dans `.nuke`
 
-## Installer dans Nuke
+## Installer dans Nuke (utilisateur final)
 
-1. Copier `publish/TColorRamp` vers `C:/Users/<user>/.nuke/TColorRamp`
-2. Dans `C:/Users/<user>/.nuke/init.py`, ajouter:
+1. Cloner le repo
+2. Glisser `publish/TColorRamp` dans `C:/Users/<user>/.nuke/`
+3. Redemarrer Nuke
+
+Les binaires (`.dll`, `.so`, `.dylib`) sont versionnes dans `publish/TColorRamp/bin/...`.
+
+Si ton setup Nuke ne charge pas automatiquement le dossier, ajoute en fallback dans `.nuke/init.py`:
 
 ```python
 import nuke
 nuke.pluginAddPath(r"C:/Users/<user>/.nuke/TColorRamp")
 ```
-
-3. Redemarrer Nuke
 
 ## Verification rapide
 

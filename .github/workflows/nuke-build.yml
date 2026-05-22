@@ -331,6 +331,18 @@ jobs:
 
           find publish/TColorRamp -type d -name "__pycache__" -prune -exec rm -rf {} +
 
+          # Compatibility fallback: expose a 17.0 folder from 16.0 binaries
+          # when native 17.0 artifacts are unavailable.
+          if [[ -d "publish/TColorRamp/bin/16.0" ]]; then
+            while IFS= read -r -d '' src; do
+              dst="${src/\/16.0\//\/17.0\/}"
+              if [[ ! -f "$dst" ]]; then
+                mkdir -p "$(dirname "$dst")"
+                cp -f "$src" "$dst"
+              fi
+            done < <(find publish/TColorRamp/bin/16.0 -type f \( -name "*.dll" -o -name "*.so" -o -name "*.dylib" \) -print0)
+          fi
+
       - name: Commit publish updates
         working-directory: .
         run: |

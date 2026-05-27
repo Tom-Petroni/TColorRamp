@@ -45,9 +45,14 @@ Exemples cibles:
 
 Le repo contient un workflow GitHub Actions (`.github/workflows/nuke-build.yml`) qui:
 
-- build les versions Nuke 13.0 -> 17.0
+- build les versions Nuke 14.0 -> 17.0
 - build Windows/Linux/macOS (x86_64 + arm64 quand disponible)
 - genere un zip de release pret a copier dans `.nuke`
+
+Notes:
+
+- Les lignes 13.x ne sont pas dans la matrice par defaut de ce node.
+- Nuke 17.0 est publie avec fallback de compatibilite depuis 16.0 si un binaire natif manque sur une cible.
 
 ## Installer dans Nuke (utilisateur final)
 

@@ -97,6 +97,24 @@ def _library_filename() -> str:
     return "lib{}.dylib".format(NODE_CLASS_NAME)
 
 
+def _binary_path_for_version(
+    version_folder: str,
+    operating_system: str,
+    architecture: str,
+) -> str:
+    """Return expected binary path for a given version/OS/arch tuple."""
+    return normalized_path(
+        os.path.join(
+            INSTALLATION_PATH,
+            PLUGIN_BIN_DIRECTORY,
+            version_folder,
+            operating_system,
+            architecture,
+            _library_filename(),
+        )
+    )
+
+
 def _build_binary_path(plugin_path: str) -> str:
     """Build absolute plugin binary path."""
     return normalized_path(os.path.join(plugin_path, _library_filename()))
@@ -112,8 +130,16 @@ def _resolve_version_folder() -> str:
     """Resolve the best available version folder for the running Nuke."""
     requested = _get_nuke_version()
     plugin_bin_root = os.path.join(INSTALLATION_PATH, PLUGIN_BIN_DIRECTORY)
+    operating_system = _get_operating_system_name()
+    architecture = _get_arch()
 
-    if os.path.isdir(os.path.join(plugin_bin_root, requested)):
+    if os.path.isfile(
+        _binary_path_for_version(
+            requested,
+            operating_system,
+            architecture,
+        )
+    ):
         return requested
 
     if not os.path.isdir(plugin_bin_root):
@@ -145,24 +171,32 @@ def _resolve_version_folder() -> str:
     if not same_major:
         return requested
 
-    lower_or_equal = [entry for minor, entry in same_major if minor <= requested_minor]
-    if lower_or_equal:
-        selected = max(
-            lower_or_equal,
-            key=lambda version: int(version.split(".", 1)[1]),
-        )
-    else:
-        selected = min(
-            (entry for _, entry in same_major),
-            key=lambda version: int(version.split(".", 1)[1]),
-        )
-
-    logger.warning(
-        "TColorRamp binary folder '%s' not found, using '%s' fallback.",
-        requested,
-        selected,
+    lower_or_equal = sorted(
+        (entry for minor, entry in same_major if minor <= requested_minor),
+        key=lambda version: int(version.split(".", 1)[1]),
+        reverse=True,
     )
-    return selected
+    higher = sorted(
+        (entry for minor, entry in same_major if minor > requested_minor),
+        key=lambda version: int(version.split(".", 1)[1]),
+    )
+
+    candidates = lower_or_equal + higher
+    for candidate in candidates:
+        if os.path.isfile(
+            _binary_path_for_version(candidate, operating_system, architecture),
+        ):
+            if candidate != requested:
+                logger.warning(
+                    "TColorRamp binary for '%s' on %s/%s not found, using '%s' fallback.",
+                    requested,
+                    operating_system,
+                    architecture,
+                    candidate,
+                )
+            return candidate
+
+    return requested
 
 
 def _build_plugin_path() -> str:

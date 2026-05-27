@@ -57,16 +57,18 @@ Notes:
 ## Installer dans Nuke (utilisateur final)
 
 1. Cloner le repo
-2. Glisser `publish/TColorRamp` dans `C:/Users/<user>/.nuke/`
+2. Copier le contenu de `publish/` dans `C:/Users/<user>/.nuke/`:
+   - `publish/init.py`
+   - `publish/TColorRamp/`
 3. Redemarrer Nuke
 
 Les binaires (`.dll`, `.so`, `.dylib`) sont versionnes dans `publish/TColorRamp/bin/...`.
 
-Si ton setup Nuke ne charge pas automatiquement le dossier, ajoute en fallback dans `.nuke/init.py`:
+Si tu as deja un `.nuke/init.py`, fusionne simplement la ligne suivante dedans:
 
 ```python
 import nuke
-nuke.pluginAddPath(r"C:/Users/<user>/.nuke/TColorRamp")
+nuke.pluginAddPath("./TColorRamp")
 ```
 
 ## Verification rapide
